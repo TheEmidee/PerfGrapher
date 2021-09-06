@@ -16,7 +16,7 @@ export default class DataDetails extends Component {
   }
 
   componentDidMount() {
-    axios.get( `http://localhost:4000/projects/data-details/${this.state.projectName}/${this.state.mapName}/${this.state.sha}`)
+    axios.get( `/projects/data-details/${this.state.projectName}/${this.state.mapName}/${this.state.sha}`)
       .then(res => {
         this.setState({
             data: res.data
