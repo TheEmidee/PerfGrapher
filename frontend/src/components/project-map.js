@@ -59,7 +59,7 @@ export default class ProjectMap extends Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:4000/projects/get-map-stats/' + this.state.projectName + "/" + this.state.mapName)
+    axios.get('/projects/get-map-stats/' + this.state.projectName + "/" + this.state.mapName)
       .then(res => {
         this.setState({
             data: res.data,
@@ -74,7 +74,7 @@ export default class ProjectMap extends Component {
   }
   
   deleteMap() {
-    axios.delete('http://localhost:4000/projects/delete-map/' + this.state.projectName + "/" + this.state.mapName)
+    axios.delete('/projects/delete-map/' + this.state.projectName + "/" + this.state.mapName)
         .then((res) => {
             console.log('Map successfully deleted!')
         }).catch((error) => {

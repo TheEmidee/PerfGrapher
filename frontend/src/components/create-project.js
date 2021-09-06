@@ -29,7 +29,7 @@ export default class CreateProject extends Component {
       repository: "https://github.com/FishingCactus/swarms",
     };
 
-    axios.post('http://localhost:4000/projects/create-project', projectObject)
+    axios.post('/projects/create-project', projectObject)
       .then(res => console.log(res.data));
 
     this.setState({name: ''})

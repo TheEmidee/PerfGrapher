@@ -4,6 +4,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
+import axios from 'axios';
 
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
@@ -14,6 +15,8 @@ import ProjectMap from './components/project-map';
 import ProjectMapLocation from './components/project-map-location';
 import DataDetails from './components/data-details';
 import GenericNotFound from './components/generic-not-found';
+
+axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
 
 function App() {
   return (<Router>

@@ -17,7 +17,7 @@ export default class Project extends Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:4000/projects/get-maps/' + this.state.projectName )
+    axios.get( `/projects/get-maps/${this.state.projectName}` )
       .then(res => {
         this.setState({
           maps: res.data
@@ -39,7 +39,7 @@ export default class Project extends Component {
   }
 
   deleteProject() {
-    axios.delete('http://localhost:4000/projects/delete-project/' + this.state.projectName)
+    axios.delete('/projects/delete-project/' + this.state.projectName)
         .then((res) => {
             console.log('Project successfully deleted!')
         }).catch((error) => {
