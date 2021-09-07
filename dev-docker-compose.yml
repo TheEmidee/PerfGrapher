@@ -14,8 +14,12 @@ services:
       - 4000
     # Environment variables
     environment:
-      - MONGO_URI=mongodb://db:27017/db
-      - PORT=4000
+      - MONGO_URL=${BACKEND_MONGO_URL}
+      - MONGO_DATABASE=${BACKEND_MONGO_DATABASE}
+      - MONGO_PARAMETERS=${BACKEND_MONGO_PARAMETERS}
+      - MONGO_PORT=${BACKEND_MONGO_PORT}
+      - MONGO_USERNAME=${BACKEND_MONGO_USERNAME}
+      - PORT=${BACKEND_PORT}
       - JWT_SECRET=secretsecret
       - JWT_EXPIRY=30d
       - DEBUG=worker:*
@@ -43,8 +47,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile-dev
     environment:
-      - REACT_APP_PORT=3000
-      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_PORT=${REACT_APP_PORT}
+      - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
     expose:
       - 3000
     ports:
