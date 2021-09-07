@@ -145,8 +145,8 @@ router.route('/add-perf-data/').post((req, res, next) => {
     return res.status(400).json({ error: "Invalid parameters" });
   }
 
+  const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../public/files/";
   const filePrefix = `${projectName}_${mapName}_${sha}`;
-  const filesFolder = __dirname + "/../../public/files/";
   const summaryFile = req.files.summary;
   const summaryFilename = `${filePrefix}_${summaryFile.name}`;
   const summaryFullPath = path.join( filesFolder, summaryFilename );
