@@ -20,6 +20,7 @@ services:
       - MONGO_PORT=${BACKEND_MONGO_PORT}
       - MONGO_USERNAME=${BACKEND_MONGO_USERNAME}
       - PORT=${BACKEND_PORT}
+      - FILES_UPLOAD_FOLDER=${BACKEND_FILES_UPLOAD_FOLDER}
       - JWT_SECRET=secretsecret
       - JWT_EXPIRY=30d
       - DEBUG=worker:*
