@@ -16,6 +16,9 @@ import ProjectMapLocation from './components/project-map-location';
 import DataDetails from './components/data-details';
 import GenericNotFound from './components/generic-not-found';
 
+const dotenv = require( "dotenv" )
+dotenv.config()
+
 axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
 
 function App() {
