@@ -37,8 +37,8 @@ services:
     # Nodemon for hot reloading (-L flag required for polling in Docker)
     command: nodemon -L src/server.js
     # Connect to other containers
-    links:
-      - db
+    # links:
+      # - db
     # Restart action
     restart: always
   ##########################
