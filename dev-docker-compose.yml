@@ -62,11 +62,3 @@ services:
       - server
     command: npm run start
     restart: always
-  ##########################
-  ### SETUP DB CONTAINER
-  ##########################
-  db:
-    image: mongo
-    ports:
-      - 27017:27017
-    restart: always
