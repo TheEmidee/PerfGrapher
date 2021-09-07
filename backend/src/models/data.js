@@ -7,21 +7,8 @@ let dataSchema = new Schema( {
   sha: { type: String },
   date: { type: Date },
   "ReportName" : { type: String },
-  stats: Schema.Types.Mixed
-  // {
-  //   "Hitches/Min": { type: Number },
-  //   "HitchTimePercent": { type: Number },
-  //   "MVP60": { type: Number },
-  //   "Frametime Avg": { type: Number },
-  //   "GameThreadtime Avg": { type: Number },
-  //   "RenderThreadtime Avg": { type: Number },
-  //   "GPUtime Avg": { type: Number },
-  //   "RHI/Drawcalls Avg": { type: Number },
-  //   "MemoryFreeMB Min": { type: Number },
-  //   "PhysicalUsedMB Max": { type: Number },
-  //   "Basic/TicksQueued Avg": { type: Number }
-  // },
-  // metrics: Schema.Types.Mixed
+  stats: Schema.Types.Mixed,
+  hitchStats: Schema.Types.Mixed
 }, 
 {
     collection: 'data'

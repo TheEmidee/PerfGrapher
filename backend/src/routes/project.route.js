@@ -5,7 +5,9 @@ let mongoose = require('mongoose'),
   fs = require('fs'),
   path = require("path");
 
-// project Model
+const fsPromises = fs.promises;
+
+  // project Model
 let projectSchema = require('../models/project');
 let dataSchema = require('../models/data');
 
@@ -136,7 +138,7 @@ router.route('/data-details/:project_name/:map_name/:sha').get((req,res,next) =>
   )
 })
 
-router.route('/add-perf-data/').post((req, res, next) => {
+router.route('/add-perf-data/').post( async ( req, res, next ) => {
   const projectName = req.query.project_name;
   const mapName = req.query.map;
   const sha = req.query.sha;
@@ -145,7 +147,8 @@ router.route('/add-perf-data/').post((req, res, next) => {
     return res.status(400).json({ error: "Invalid parameters" });
   }
 
-  const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../public/files/";
+  const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../../frontend/public/files/";
+
   const filePrefix = `${projectName}_${mapName}_${sha}`;
   const summaryFile = req.files.summary;
   const summaryFilename = `${filePrefix}_${summaryFile.name}`;
@@ -159,128 +162,85 @@ router.route('/add-perf-data/').post((req, res, next) => {
   const metricsFileName = `${filePrefix}_${metricsFile.name}`;
   const metricsFullPath = path.join( filesFolder, metricsFileName );
 
-  summaryFile.mv( summaryFullPath );
-  metricsFile.mv( metricsFullPath );
-  graphFile.mv( graphFullPath );
+  const hitchesFile = req.files.hitches;
+  const hitchesFileName = `${filePrefix}_${hitchesFile.name}`;
+  const hitchesFullPath = path.join( filesFolder, hitchesFileName );
 
-  const file = fs.createReadStream( summaryFullPath );
-
-  if ( !file ) {
-    return res.json({ message: "Impossible to read the summary file", code: 500 });
-  }
-
-  const addToMongo = ( mongo_data ) => {
-    return projectSchema.findOne( 
-      { name: mongo_data.project_name }, 
-      ( error, project_data ) => {
-        if (error) {
-          return next(error);
-        }
-        var result = { success: false, error: "" }
-
-        if ( project_data == null ) {
-          return next( "The project does not exist" );
-        }
-
-        const new_data = new dataSchema({
-          _id: new mongoose.Types.ObjectId(),
-          project: project_data.name,
-          map: mongo_data.map_name,
-          sha: sha,
-          date: Date.now(),
-          ReportName: mongo_data.report_path,
-          stats: mongo_data.stats
-        });
-
-        new_data.save( function (err) {
-          if (err) {
-            return next(err);
-          }
-
-          return res.json( result );
-        });
-      });
-  }
-
-  const getJsonFromCSV = ( csv_data ) => {
-    const map = new Map();
-    const data = csv_data.data;
-    const header_row = data[ 0 ]; 
-    const value_row = data[ 1 ]; 
-    const col_count = header_row.length - 1;
-
-    for (let col_index = 1; col_index < col_count; col_index++) {
-      map.set( header_row[ col_index ], value_row[ col_index ] );
-    }
-
-    const autoConvertMapToObject = (map) => {
-      const obj = {};
-      for (const item of [...map]) {
-        const [
-          key,
-          value
-        ] = item;
-        obj[key] = value;
-      }
-      return obj;
-    }
+  try {
+    await fsPromises.rename( summaryFile.tempFilePath, summaryFullPath );
+    await fsPromises.rename( graphFile.tempFilePath, graphFullPath );
+    await fsPromises.rename( metricsFile.tempFilePath, metricsFullPath );
+    await fsPromises.rename( hitchesFile.tempFilePath, hitchesFullPath );
     
-    const result = autoConvertMapToObject(map)
+    async function parseJSONFile( file_path ) {
+      const metricsBuffer = await fsPromises.readFile( file_path );
+      return JSON.parse( metricsBuffer );
+    }
 
-    return result;
-  }
+    const metricsJSON = await parseJSONFile( metricsFullPath );
+    const statsJSON = await parseJSONFile( summaryFullPath );
+    const hitchesJSON = await parseJSONFile( hitchesFullPath );
 
-  papa.parse(file, {
-      complete: function( results, file ) {
-        let metrics_raw_data = fs.readFileSync( metricsFullPath );
-        let metrics = JSON.parse( metrics_raw_data );
-
-        const flattenMetricsJson = (data) => {
-          var result = {};
-          function recurse (cur, prop) {
-              if (Object(cur) !== cur) {
-                  result[prop] = cur;
-              } else if (Array.isArray(cur)) {
-                   for(var i=0, l=cur.length; i<l; i++)
-                       recurse(cur[i], prop + "[" + i + "]");
-                  if (l == 0)
-                      result[prop] = [];
-              } else {
-                  var isEmpty = true;
-                  for (var p in cur) {
-                      isEmpty = false;
-                      recurse(cur[p], prop ? prop+"_"+p : p);
-                  }
-                  if (isEmpty && prop)
-                      result[prop] = {};
+    const flattenMetricsJson = (data) => {
+      var result = {};
+      function recurse (cur, prop) {
+          if (Object(cur) !== cur) {
+              result[prop] = cur;
+          } else if (Array.isArray(cur)) {
+              for(var i=0, l=cur.length; i<l; i++)
+                  recurse(cur[i], prop + "[" + i + "]");
+              if (l == 0)
+                  result[prop] = [];
+          } else {
+              var isEmpty = true;
+              for (var p in cur) {
+                  isEmpty = false;
+                  recurse(cur[p], prop ? prop+"_"+p : p);
               }
+              if (isEmpty && prop)
+                  result[prop] = {};
           }
-          recurse(data, "");
-          return result;
-        }
-        
-        const flattenMetrics = flattenMetricsJson( metrics );
-        let stats = getJsonFromCSV( results );
-        let merged_stats = { ...stats, ...flattenMetrics };
-
-        var mongo_data = {
-          project_name: projectName,
-          map_name: mapName,
-          stats : merged_stats,
-          report_path: graphFileName
-        };
-
-        fs.unlinkSync( summaryFullPath );
-        fs.unlinkSync( metricsFullPath );
-
-        return addToMongo( mongo_data )
-      },
-      err: function( err, file ) {
-        if (err) {
-          return next( err )
-        }
       }
-  });
+      recurse(data, "");
+      return result;
+    }
+
+    const cleanStatsJSON = ( data ) => {
+      let result = data[ 0 ];
+      delete result[ "Section Name" ];
+      return result;
+    }
+
+    const flattenedMetricsJSON = flattenMetricsJson( metricsJSON );
+    const cleanedStatsJSON = cleanStatsJSON( statsJSON );
+
+    const mergedStatsJSON = { ...cleanedStatsJSON, ...flattenedMetricsJSON };
+    const projectData = await projectSchema.findOne( { name: projectName } );
+
+    if ( !projectData ) {
+      throw new `Could not find project ${projectName}`
+    }
+
+    const newData = new dataSchema({
+      _id: new mongoose.Types.ObjectId(),
+      project: projectName,
+      map: mapName,
+      sha: sha,
+      date: Date.now(),
+      ReportName: graphFileName,
+      stats: mergedStatsJSON,
+      hitchStats: hitchesJSON
+    });
+
+    await newData.save();
+
+    await fsPromises.unlink( metricsFullPath );
+    await fsPromises.unlink( summaryFullPath );
+
+    return res.json( { success: true } );
+  } catch ( err ) {
+    return next( err );
+  }
 })
 
 // Delete project
