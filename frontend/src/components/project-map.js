@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from 'axios';
 import { Breadcrumb, Row, Col, Container, Button, Form } from "react-bootstrap";
 import { Line } from 'react-chartjs-2';
+import ItemSelector from './item-selector';
 
 export default class ProjectMap extends Component {
 
@@ -11,28 +12,24 @@ export default class ProjectMap extends Component {
     this.state = {
       projectName: this.props.match.params.project_name,
       mapName: this.props.match.params.map_name,
-      counterNames: [],
+      categories: [ 'stats', 'metrics' ],
+      selectedCategory: "stats",
+      selectedCategoryStatNames: [],
+      selectedStat: "",
       data: [],
       chartData: []
     };
 
     this.deleteMap = this.deleteMap.bind(this);
-    this.handleChange = this.handleChange.bind( this );
+    this.onSelectedCategoryChanged = this.onSelectedCategoryChanged.bind( this );
+    this.onSelectedStatChanged = this.onSelectedStatChanged.bind( this );
     this.onChartItemClicked = this.onChartItemClicked.bind( this );
   }
 
-  getCounterNames( data ) {
-    // data is sorted by date descending
-    const latestData = data[ 0 ];
-    const stats = latestData.stats;
-
-    return Object.keys( stats );
-  }
-
-  createChartData( selected_stat = "" ) {
+  createChartData( selected_category, selected_stat = '' ) {
 
     if ( selected_stat === "" ) {
-      selected_stat = this.state.counterNames[ 0 ];
+      selected_stat = this.state.selectedCategoryStatNames[ 0 ];
     }
 
     var labels = []
@@ -40,7 +37,7 @@ export default class ProjectMap extends Component {
 
     for ( var i = 0; i < this.state.data.length; i++ ) {
         labels.push( this.state.data[ i ].sha )
-        counter_data.push( this.state.data[ i ].stats[ selected_stat ] )
+        counter_data.push( this.state.data[ i ][ selected_category ][ selected_stat ] )
     }
 
     const data = {
@@ -55,18 +52,17 @@ export default class ProjectMap extends Component {
             }
         ] };
 
-    this.setState( { chartData: data } );
+    return data;
   }
 
   componentDidMount() {
-    axios.get('/projects/get-map-stats/' + this.state.projectName + "/" + this.state.mapName)
+    axios.get( `/projects/get-map-stats/${this.state.projectName}/${this.state.mapName}` )
       .then(res => {
-        this.setState({
-            data: res.data,
-            counterNames: this.getCounterNames( res.data ),
+        this.setState( {
+          data: res.data
         });
 
-        this.createChartData();
+        this.selectCategory( "stats" )
       })
       .catch((error) => {
         console.log(error);
@@ -82,12 +78,55 @@ export default class ProjectMap extends Component {
         })
   }
 
-  handleChange(e ) {
+  selectStat( stat_name ) {
+    this.setState( {
+      selectedStat: stat_name,
+      chartData: this.createChartData( this.state.selectedCategory, stat_name )
+    })
+  }
+
+  onSelectedStatChanged(e ) {
+    e.persist();
+    var selectedStat = e.target.value.substring( "stat-".length )
+    this.selectStat( selectedStat )
+  }
+
+  getCategoryStatNames( category_name ) {
+    if ( this.state.data ) {
+      const latestData = this.state.data[ 0 ];
+
+      if ( latestData ) {
+        const data = category_name === "metrics"
+          ? latestData.metrics
+          : latestData.stats;
+
+        if ( data ) {
+          return Object.keys( data );
+        }
+      }
+    }
+    
+    return [];
+  }
+
+  selectCategory( category_name ) {
+    const categoryStatNames = this.getCategoryStatNames( category_name );
+    const selectedStat = categoryStatNames[ 0 ];
+
+    this.setState( {
+      selectedCategory: category_name,
+      selectedCategoryStatNames: categoryStatNames,
+      selectedStat: selectedStat,
+      chartData: this.createChartData( category_name, selectedStat )
+    } );
+  }
+
+  onSelectedCategoryChanged( e ) {
     e.persist();
 
-    var selected_stat = e.target.value.substring( "stat-".length )
+    const selectedCategoryName = e.target.value.substring( "category-".length );
 
-    this.createChartData( selected_stat );
+    this.selectCategory( selectedCategoryName );
   }
 
   onChartItemClicked( element ) {
@@ -112,28 +151,25 @@ export default class ProjectMap extends Component {
         <Row>
             <Col>
                 <Form>
-                    <Form.Control
-                      as="select"
-                      custom
-                      onChange={this.handleChange}
-                    >
-                      {this.state.counterNames.map( ( name, i ) => (
-                        <option value={`stat-${name}`} key={name}>{name} </option>
-                      ) )}
-                    </Form.Control>
+                  <ItemSelector 
+                    items={this.state.categories} 
+                    onSelectedItemChanged={this.onSelectedCategoryChanged} 
+                    itemKeyPrefix="category" />
+                  <ItemSelector 
+                    items={this.state.selectedCategoryStatNames} 
+                    onSelectedItemChanged={this.onSelectedStatChanged} 
+                    itemKeyPrefix="stat" />
                 </Form>
             </Col>
         </Row>
         <Row>
           <Col>
             <Col>
+            {
               <Line 
                 data={this.state.chartData} 
                 getElementAtEvent={(data) => {
                   this.onChartItemClicked( data )
-              }}
-                onElementsClick={elem => {
-                  console.log( elem )
                 }}
                 options={{
                   scales: {
@@ -150,7 +186,9 @@ export default class ProjectMap extends Component {
                       },
                       ],
                   }
-                }} /></Col>
+                }} />
+              }
+              </Col>
           </Col>
         </Row>
         <Row>

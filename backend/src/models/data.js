@@ -7,8 +7,9 @@ let dataSchema = new Schema( {
   sha: { type: String },
   date: { type: Date },
   "ReportName" : { type: String },
-  stats: Schema.Types.Mixed,
-  hitchStats: Schema.Types.Mixed
+  metrics: Schema.Types.Mixed,
+  hitches: Schema.Types.Mixed,
+  stats: Schema.Types.Mixed
 }, 
 {
     collection: 'data'

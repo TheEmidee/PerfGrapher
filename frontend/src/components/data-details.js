@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Breadcrumb, Table } from 'react-bootstrap';
+import { Breadcrumb, Table, Button, Tabs, Tab } from 'react-bootstrap';
 import DataDetailsRow from './data-details-row';
+import BootstrapTable from 'react-bootstrap-table-next';
 
 export default class DataDetails extends Component {
 
@@ -33,13 +34,48 @@ export default class DataDetails extends Component {
       });
   }
 
-  renderStatsBody() {
-    if ( this.state.data && this.state.data.stats ) {
-        return Object.keys( this.state.data.stats ).map( (title, index) => {
-            return <DataDetailsRow title={title} value={this.state.data.stats[ title ]} key={index} />;
+  renderStats( data ) {
+    const columns = [
+      {
+        dataField: 'name',
+        text: 'Product Name'
+      },
+      {
+        dataField: 'value',
+        text: 'Value'
+      }
+    ];
+
+    let stats = [];
+
+    if ( data ) {
+      stats = Object.keys( data ).map( (title, index) => {
+        return { name: title, value: data[ title ] };
+      } );
+    }
+
+    return <BootstrapTable keyField='id' data={ stats } columns={ columns } />
+  }
+
+  renderHitches() {
+    const hitchesData = this.state.data.hitches;
+    let columns = []
+    let data = []
+
+    if ( hitchesData ) {
+      columns = Object.keys( hitchesData[ 0 ] ).map( ( title, index ) => {
+        return { dataField: title, text: title }
+      });
+
+      hitchesData.forEach( element => {
+        let obj = {};
+        Object.keys( element ).forEach( title => {
+          obj[ title ] = element[ title ];
         });
-    } else {
-        return <DataDetailsRow title="" value="" key="0" />;
+        data.push( obj );
+      })
+
+      return <BootstrapTable keyField='id' data={ data } columns={ columns } />
     }
   }
 
@@ -50,13 +86,23 @@ export default class DataDetails extends Component {
             <Breadcrumb.Item href={"/project-map/" + this.state.projectName + "/" + this.state.mapName}>{this.state.mapName}</Breadcrumb.Item>
         </Breadcrumb>
         <h1>Data details for commit {this.state.sha}</h1>
-        <a href={"/files/" + this.state.data.ReportName}> Report </a>
+        <Button variant="outline-secondary" href={"/files/" + this.state.data.ReportName}>View Graph Report</Button>
         <Table striped bordered hover>
             <tbody>
                 { this.renderStatsHeader() }
-                { this.renderStatsBody() }
             </tbody>
         </Table>
+        <Tabs defaultActiveKey="stats" id="uncontrolled-tab-example" className="mb-3">
+          <Tab eventKey="stats" title="Stats">
+            { this.renderStats( this.state.data.stats ) }
+          </Tab>
+          <Tab eventKey="metrics" title="Metrics">
+            { this.renderStats( this.state.data.metrics ) }
+          </Tab>
+          <Tab eventKey="hitches" title="Hitches">
+          { this.renderHitches() }
+          </Tab>
+        </Tabs>
     </div>);
   }
 }

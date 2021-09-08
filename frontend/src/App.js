@@ -3,6 +3,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import "bootstrap/dist/css/bootstrap.css";
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import "./App.css";
 import axios from 'axios';
 

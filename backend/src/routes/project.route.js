@@ -12,25 +12,22 @@ let projectSchema = require('../models/project');
 let dataSchema = require('../models/data');
 
 // CREATE project
-router.route('/create-project').post((req, res, next) => {
-  projectSchema.create(req.body, (error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.json(data)
-    }
-  })
+router.route('/create-project').post( async (req, res, next) => {
+  try {
+    const data = await projectSchema.create( req.body );
+    res.json( data );
+  } catch ( err ) {
+    return next( error );
+  }
 });
 
 // READ projects
-router.route('/').get((req, res) => {
-  projectSchema.find((error, data) => {
-    if (error) {
-      return next(error)
-    } else {
-      res.json(data)
-    }
-  })
+router.route('/').get( async ( req, res, next ) => {
+  try {
+    res.json( await projectSchema.find() );
+  } catch ( err ) {
+    return next( err )
+  }
 })
 
 router.route('/get-maps/:project_name').get((req, res) => {
@@ -213,8 +210,6 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
 
     const flattenedMetricsJSON = flattenMetricsJson( metricsJSON );
     const cleanedStatsJSON = cleanStatsJSON( statsJSON );
-
-    const mergedStatsJSON = { ...cleanedStatsJSON, ...flattenedMetricsJSON };
     const projectData = await projectSchema.findOne( { name: projectName } );
 
     if ( !projectData ) {
@@ -228,18 +223,21 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
       sha: sha,
       date: Date.now(),
       ReportName: graphFileName,
-      stats: mergedStatsJSON,
-      hitchStats: hitchesJSON
+      metrics: flattenedMetricsJSON,
+      stats: cleanedStatsJSON,
+      hitches: hitchesJSON
     });
 
     await newData.save();
 
-    await fsPromises.unlink( metricsFullPath );
-    await fsPromises.unlink( summaryFullPath );
-
     return res.json( { success: true } );
   } catch ( err ) {
     return next( err );
+  }
+  finally {
+    await fsPromises.unlink( metricsFullPath );
+    await fsPromises.unlink( summaryFullPath );
+    await fsPromises.unlink( hitchesFullPath );
   }
 })
 
