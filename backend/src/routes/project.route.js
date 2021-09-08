@@ -156,10 +156,10 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
   const hitchesFullPath = path.join( filesFolder, hitchesFileName );
 
   try {
-    await fsPromises.rename( summaryFile.tempFilePath, summaryFullPath );
-    await fsPromises.rename( graphFile.tempFilePath, graphFullPath );
-    await fsPromises.rename( metricsFile.tempFilePath, metricsFullPath );
-    await fsPromises.rename( hitchesFile.tempFilePath, hitchesFullPath );
+    await fsPromises.copyFile( summaryFile.tempFilePath, summaryFullPath );
+    await fsPromises.copyFile( graphFile.tempFilePath, graphFullPath );
+    await fsPromises.copyFile( metricsFile.tempFilePath, metricsFullPath );
+    await fsPromises.copyFile( hitchesFile.tempFilePath, hitchesFullPath );
     
     async function parseJSONFile( file_path ) {
       const metricsBuffer = await fsPromises.readFile( file_path );
@@ -248,7 +248,7 @@ router.route('/delete-project/:project_name').delete( async ( req, res, next ) =
 router.route('/delete-map/:project_name/:map_name').delete( async ( req, res, next ) => {
   try {
     await dataSchema.deleteMany( { project: req.params.project_name, map: req.params.map_name } );
-    
+
     res.json( { "success" : "ok" });
   } catch ( err ) {
     return next( err )
