@@ -41,7 +41,7 @@ export default class Project extends Component {
   deleteProject() {
     axios.delete('/projects/delete-project/' + this.state.projectName)
         .then((res) => {
-            console.log('Project successfully deleted!')
+            this.props.history.push( '/' );
         }).catch((error) => {
             console.log(error)
         })

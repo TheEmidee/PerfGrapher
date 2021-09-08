@@ -72,7 +72,7 @@ export default class ProjectMap extends Component {
   deleteMap() {
     axios.delete('/projects/delete-map/' + this.state.projectName + "/" + this.state.mapName)
         .then((res) => {
-            console.log('Map successfully deleted!')
+          this.props.history.push( `/project/${this.state.projectName}` );
         }).catch((error) => {
             console.log(error)
         })

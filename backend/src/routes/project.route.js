@@ -30,30 +30,25 @@ router.route('/').get( async ( req, res, next ) => {
   }
 })
 
-router.route('/get-maps/:project_name').get((req, res) => {
-  dataSchema
-    .find( { "project": req.params.project_name }, "map" )
-    .distinct( 'map', (error, data) => {
-      if (error) {
-        return next(error)
-      }
-
-      res.json( data );
-    })
+router.route('/get-maps/:project_name').get( async ( req, res, next ) => {
+  try {
+    res.json( await dataSchema
+      .find( { "project": req.params.project_name }, "map" )
+      .distinct( 'map' ) );
+  } catch ( err ) {
+    return next( err );
+  }
 })
 
-router.route('/get-map-stats/:project_name/:map_name').get((req, res) => {
-  dataSchema
-    .find( { "project": req.params.project_name, "map": req.params.map_name } )
-    .sort( { "date": "descending" } )
-    .limit( 50 )
-    .exec( (error, data) => {
-      if (error) {
-        return next(error)
-      }
-      
-      res.json( data );
-    })
+router.route('/get-map-stats/:project_name/:map_name').get( async ( req, res, next ) => {
+  try {
+    return res.json( await dataSchema
+      .find( { "project": req.params.project_name, "map": req.params.map_name } )
+      .sort( { "date": "descending" } )
+      .limit( 50 ) );
+  } catch ( err ) {
+    return next( err );
+  }
 });
 
 router.route('/get-map-locations/:project_name/:map_name').get((req, res) => {
@@ -118,21 +113,18 @@ router.route('/get-location-data/:project_name/:map_name/:location_name').get((r
     })
 })
 
-router.route('/data-details/:project_name/:map_name/:sha').get((req,res,next) => {
-  dataSchema.findOne(
-    { 
-      "project": req.params.project_name,
-      "map": req.params.map_name,
-      "sha": req.params.sha 
-    },
-    ( error, data ) => {
-      if (error) {
-        return next(error);
+router.route('/data-details/:project_name/:map_name/:sha').get( async ( req, res, next ) => {
+  try {
+    res.json( await dataSchema.findOne(
+      { 
+        "project": req.params.project_name,
+        "map": req.params.map_name,
+        "sha": req.params.sha 
       }
-
-      res.json( data )
-    }
-  )
+    ) );
+  } catch ( err ) {
+    return next( err );
+  }
 })
 
 router.route('/add-perf-data/').post( async ( req, res, next ) => {
@@ -242,31 +234,25 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
 })
 
 // Delete project
-router.route('/delete-project/:project_name').delete((req, res, next) => {
-  projectSchema.findOneAndRemove( { name: req.params.project_name }, (error, data) => {
-    if (error) {
-      return next(error);
-    }
+router.route('/delete-project/:project_name').delete( async ( req, res, next ) => {
+  try {
+    await projectSchema.findOneAndRemove( { name: req.params.project_name } );
+    await dataSchema.deleteMany( { project: req.params.project_name } );
 
-    dataSchema.deleteMany( { project: req.params.project_name }, ( err, data ) => {
-      if (error) {
-        return next(error);
-      }
-      
-      res.json( { "success" : "ok" });
-    });
-  })
+    res.json( { "success" : "ok" });
+  } catch ( err ) {
+    return next( err );
+  }
 })
 
-// Delete project map
-router.route('/delete-map/:project_name/:map_name').delete((req, res, next) => {
-  dataSchema.deleteMany( { project: req.params.project_name, map: req.params.map_name }, ( err, data ) => {
-    if (err) {
-      return next(err);
-    }
+router.route('/delete-map/:project_name/:map_name').delete( async ( req, res, next ) => {
+  try {
+    await dataSchema.deleteMany( { project: req.params.project_name, map: req.params.map_name } );
     
     res.json( { "success" : "ok" });
-  })
+  } catch ( err ) {
+    return next( err )
+  }
 })
 
 router.route('/delete-map-location/:project_name/:map_name/:location_name').delete((req, res, next) => {
