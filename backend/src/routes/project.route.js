@@ -162,8 +162,8 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
     await fsPromises.copyFile( hitchesFile.tempFilePath, hitchesFullPath );
     
     async function parseJSONFile( file_path ) {
-      const metricsBuffer = await fsPromises.readFile( file_path );
-      return JSON.parse( metricsBuffer );
+      const dataBuffer = await fsPromises.readFile( file_path );
+      return JSON.parse( dataBuffer );
     }
 
     const metricsJSON = await parseJSONFile( metricsFullPath );
