@@ -77,7 +77,7 @@ export default class ProjectMapLocation extends Component {
   }
 
   componentDidMount() {
-    axios.get('/projects/get-location-data/' + this.state.projectName + "/" + this.state.mapName + "/" + this.state.locationName)
+    axios.get('/api/get-location-data/' + this.state.projectName + "/" + this.state.mapName + "/" + this.state.locationName)
       .then(res => {
         this.setState( { 
             locationData: res.data,
@@ -90,7 +90,7 @@ export default class ProjectMapLocation extends Component {
   }
   
   deleteLocation() {
-    axios.delete('/projects/delete-map-location/' + this.state.projectName + "/" + this.state.mapName + "/" + this.state.locationName)
+    axios.delete('/api/delete-map-location/' + this.state.projectName + "/" + this.state.mapName + "/" + this.state.locationName)
         .then((res) => {
             console.log('Location successfully deleted!')
         }).catch((error) => {

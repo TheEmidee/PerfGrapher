@@ -11,7 +11,22 @@ const fsPromises = fs.promises;
 let projectSchema = require('../models/project');
 let dataSchema = require('../models/data');
 
-// CREATE project
+router.route('/').get( async ( req, res, next ) => {
+  try {
+    res.json( {} );
+  } catch ( err ) {
+    return next( err )
+  }
+})
+
+router.route('/get-projects').get( async ( req, res, next ) => {
+  try {
+    res.json( await projectSchema.find() );
+  } catch ( err ) {
+    return next( err )
+  }
+})
+
 router.route('/create-project').post( async (req, res, next) => {
   try {
     const data = await projectSchema.create( req.body );
@@ -20,15 +35,6 @@ router.route('/create-project').post( async (req, res, next) => {
     return next( error );
   }
 });
-
-// READ projects
-router.route('/').get( async ( req, res, next ) => {
-  try {
-    res.json( await projectSchema.find() );
-  } catch ( err ) {
-    return next( err )
-  }
-})
 
 router.route('/get-maps/:project_name').get( async ( req, res, next ) => {
   try {

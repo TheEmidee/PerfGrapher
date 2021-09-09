@@ -5,7 +5,7 @@ let fileUpload = require("express-fileupload");
 const dotenv = require( "dotenv" )
 
 // Express Route
-const projectRoute = require('../src/routes/project.route')
+const apiRoute = require('../src/routes/api.route')
 
 dotenv.config()
 
@@ -34,7 +34,7 @@ app.use(fileUpload( {
   useTempFiles : true,
   tempFileDir : '/tmp/'
 }))
-app.use('/projects', projectRoute)
+app.use('/api', apiRoute)
 
 // PORT
 const port = process.env.PORT || 4000;
