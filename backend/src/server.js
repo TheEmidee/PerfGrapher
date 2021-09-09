@@ -9,11 +9,11 @@ const projectRoute = require('../src/routes/project.route')
 
 dotenv.config()
 
-var uri = `mongodb+srv://dbUser:${process.env.MONGO_USERNAME}@${process.env.MONGO_URL}/${process.env.MONGO_DATABASE}?${process.env.MONGO_PARAMETERS}`
+const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/test";
 
 // Connecting mongoDB Database
 mongoose.Promise = global.Promise;
-mongoose.connect(uri, {
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false

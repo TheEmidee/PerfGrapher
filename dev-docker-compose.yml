@@ -14,11 +14,7 @@ services:
       - 4000
     # Environment variables
     environment:
-      - MONGO_URL=${BACKEND_MONGO_URL}
-      - MONGO_DATABASE=${BACKEND_MONGO_DATABASE}
-      - MONGO_PARAMETERS=${BACKEND_MONGO_PARAMETERS}
-      - MONGO_PORT=${BACKEND_MONGO_PORT}
-      - MONGO_USERNAME=${BACKEND_MONGO_USERNAME}
+      - MONGO_URI=${BACKEND_MONGO_URI}
       - PORT=${BACKEND_PORT}
       - FILES_UPLOAD_FOLDER=${BACKEND_FILES_UPLOAD_FOLDER}
       - JWT_SECRET=secretsecret
@@ -37,8 +33,8 @@ services:
     # Nodemon for hot reloading (-L flag required for polling in Docker)
     command: nodemon -L src/server.js
     # Connect to other containers
-    # links:
-      # - db
+    links:
+      - db
     # Restart action
     restart: always
   ##########################
@@ -61,4 +57,12 @@ services:
     links:
       - server
     command: npm run start
+    restart: always
+  ##########################
+  ### SETUP DB CONTAINER
+  ##########################
+  db:
+    image: mongo
+    ports:
+      - 27017:27017
     restart: always
