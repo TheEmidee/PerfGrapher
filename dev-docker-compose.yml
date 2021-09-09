@@ -14,9 +14,9 @@ services:
       - 4000
     # Environment variables
     environment:
-      - MONGO_URI=${BACKEND_MONGO_URI}
-      - PORT=${BACKEND_PORT}
-      - FILES_UPLOAD_FOLDER=${BACKEND_FILES_UPLOAD_FOLDER}
+      - MONGO_URI=mongodb://db:27017/perfgrapher
+      - PORT=4000
+      - FILES_UPLOAD_FOLDER=
       - JWT_SECRET=secretsecret
       - JWT_EXPIRY=30d
       - DEBUG=worker:*
@@ -45,8 +45,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile-dev
     environment:
-      - REACT_APP_PORT=${REACT_APP_PORT}
-      - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
+      - REACT_APP_PORT=3000
+      - REACT_APP_SERVER_URL=http://localhost:4000
     expose:
       - 3000
     ports:
