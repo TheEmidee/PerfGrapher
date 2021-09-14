@@ -1,7 +1,6 @@
-let mongoose = require('mongoose'),
+const mongoose = require('mongoose'),
   express = require('express'),
   router = express.Router(),
-  papa = require('papaparse'),
   fs = require('fs'),
   path = require("path");
 
@@ -156,38 +155,26 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
   }
 
   const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../../frontend/public/files/";
-
   const filePrefix = `${projectName}_${mapName}_${sha}`;
+  
   const summaryFile = req.files.summary;
-  const summaryFilename = `${filePrefix}_${summaryFile.name}`;
-  const summaryFullPath = path.join( filesFolder, summaryFilename );
-
-  const graphFile = req.files.graph;
-  const graphFileName = `${filePrefix}_${graphFile.name}`;
-  const graphFullPath = path.join( filesFolder, graphFileName );
-
   const metricsFile = req.files.metrics;
-  const metricsFileName = `${filePrefix}_${metricsFile.name}`;
-  const metricsFullPath = path.join( filesFolder, metricsFileName );
-
   const hitchesFile = req.files.hitches;
-  const hitchesFileName = `${filePrefix}_${hitchesFile.name}`;
-  const hitchesFullPath = path.join( filesFolder, hitchesFileName );
+  
+  const graphFile = req.files.graph;
+  const graphFullPath = path.join( filesFolder, `${filePrefix}.html` );
 
   try {
-    await fsPromises.copyFile( summaryFile.tempFilePath, summaryFullPath );
     await fsPromises.copyFile( graphFile.tempFilePath, graphFullPath );
-    await fsPromises.copyFile( metricsFile.tempFilePath, metricsFullPath );
-    await fsPromises.copyFile( hitchesFile.tempFilePath, hitchesFullPath );
     
     async function parseJSONFile( file_path ) {
       const dataBuffer = await fsPromises.readFile( file_path );
       return JSON.parse( dataBuffer );
     }
 
-    const metricsJSON = await parseJSONFile( metricsFullPath );
-    const statsJSON = await parseJSONFile( summaryFullPath );
-    const hitchesJSON = await parseJSONFile( hitchesFullPath );
+    const metricsJSON = await parseJSONFile( metricsFile.tempFilePath );
+    const statsJSON = await parseJSONFile( summaryFile.tempFilePath );
+    const hitchesJSON = await parseJSONFile( hitchesFile.tempFilePath );
 
     const flattenMetricsJson = (data) => {
       var result = {};
@@ -228,7 +215,6 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
       map: mapName,
       sha: sha,
       date: Date.now(),
-      ReportName: graphFileName,
       metrics: flattenedMetricsJSON,
       stats: cleanedStatsJSON,
       hitches: hitchesJSON
@@ -239,17 +225,6 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
     return res.json( { success: true } );
   } catch ( err ) {
     return next( err );
-  }
-  finally {
-    const unlinkFileIfExists = async ( file_path ) => {
-      if ( fs.existsSync( file_path ) ) {
-        await fsPromises.unlink( file_path );
-      }
-    }
-
-    await unlinkFileIfExists( metricsFullPath );
-    await unlinkFileIfExists( summaryFullPath );
-    await unlinkFileIfExists( hitchesFullPath );
   }
 })
 

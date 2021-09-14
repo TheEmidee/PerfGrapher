@@ -6,7 +6,6 @@ let dataSchema = new Schema( {
   map: { type: String },
   sha: { type: String },
   date: { type: Date },
-  "ReportName" : { type: String },
   metrics: Schema.Types.Mixed,
   hitches: Schema.Types.Mixed,
   stats: Schema.Types.Mixed
