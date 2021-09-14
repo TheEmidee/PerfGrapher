@@ -233,9 +233,15 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
     return next( err );
   }
   finally {
-    await fsPromises.unlink( metricsFullPath );
-    await fsPromises.unlink( summaryFullPath );
-    await fsPromises.unlink( hitchesFullPath );
+    const unlinkFileIfExists = async ( file_path ) => {
+      if ( fs.existsSync( file_path ) ) {
+        await fsPromises.unlink( file_path );
+      }
+    }
+
+    await unlinkFileIfExists( metricsFullPath );
+    await unlinkFileIfExists( summaryFullPath );
+    await unlinkFileIfExists( hitchesFullPath );
   }
 })
 
