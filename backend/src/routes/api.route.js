@@ -51,7 +51,7 @@ router.route('/get-map-stats/:project_name/:map_name').get( async ( req, res, ne
   try {
     return res.json( await dataSchema
       .find( { "project": req.params.project_name, "map": req.params.map_name } )
-      .sort( { "date": "descending" } )
+      .sort( { "date": "ascending" } )
       .limit( 50 ) );
   } catch ( err ) {
     return next( err );
