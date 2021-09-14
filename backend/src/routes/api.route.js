@@ -10,6 +10,7 @@ const fsPromises = fs.promises;
   // project Model
 let projectSchema = require('../models/project');
 let dataSchema = require('../models/data');
+const project = require('../models/project');
 
 router.route('/').get( async ( req, res, next ) => {
   try {
@@ -121,13 +122,19 @@ router.route('/get-location-data/:project_name/:map_name/:location_name').get((r
 
 router.route('/data-details/:project_name/:map_name/:sha').get( async ( req, res, next ) => {
   try {
-    res.json( await dataSchema.findOne(
+    const result = await dataSchema.findOne(
       { 
         "project": req.params.project_name,
         "map": req.params.map_name,
         "sha": req.params.sha 
-      }
-    ) );
+      }).lean()
+
+    const project = await projectSchema.findOne( { name: req.params.project_name } )
+
+    res.json( {
+      project: project,
+      data_details: result
+    } );
   } catch ( err ) {
     return next( err );
   }

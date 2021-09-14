@@ -12,7 +12,9 @@ export default class DataDetails extends Component {
         projectName: this.props.match.params.project_name,
         mapName: this.props.match.params.map_name,
         sha: this.props.match.params.sha,
-        data: []
+        dataDetails: [],
+        projectDetails: [],
+        shaLink: ''
     };
   }
 
@@ -20,7 +22,9 @@ export default class DataDetails extends Component {
     axios.get( `/api/data-details/${this.state.projectName}/${this.state.mapName}/${this.state.sha}`)
       .then(res => {
         this.setState({
-            data: res.data
+          dataDetails: res.data.data_details,
+          projectDetails: res.data.project,
+          shaLink: `${res.data.project.repository}/commit/${res.data.data_details.sha}`
         });
       })
       .catch((error) => {
@@ -29,8 +33,8 @@ export default class DataDetails extends Component {
   }
 
   renderStatsHeader() {
-    return [ "project", "map", "date", "sha" ].map((title, index) => {
-        return <DataDetailsRow title={title} value={this.state?.data[ title ]} key={index} />;
+    return [ "map", "date", "sha" ].map((title, index) => {
+        return <DataDetailsRow title={title} value={this.state?.dataDetails[ title ]} key={index} />;
       });
   }
 
@@ -58,7 +62,7 @@ export default class DataDetails extends Component {
   }
 
   renderHitches() {
-    const hitchesData = this.state.data.hitches;
+    const hitchesData = this.state.dataDetails.hitches;
     let columns = []
     let data = []
 
@@ -78,7 +82,7 @@ export default class DataDetails extends Component {
       return <BootstrapTable keyField='id' data={ data } columns={ columns } />
     }
   }
-
+  
   render() {
     return (<div className="table-wrapper">
         <Breadcrumb>
@@ -86,18 +90,21 @@ export default class DataDetails extends Component {
             <Breadcrumb.Item href={"/project-map/" + this.state.projectName + "/" + this.state.mapName}>{this.state.mapName}</Breadcrumb.Item>
         </Breadcrumb>
         <h1>Data details for commit {this.state.sha}</h1>
-        <Button variant="outline-secondary" href={"/files/" + this.state.data.ReportName}>View Graph Report</Button>
+        <Button variant="outline-secondary" href={"/files/" + this.state.dataDetails.ReportName}>View Graph Report</Button>
         <Table striped bordered hover>
             <tbody>
-                { this.renderStatsHeader() }
+              <DataDetailsRow title="Project" value={this.state.projectName} key="project" />
+              <DataDetailsRow title="Map" value={this.state?.dataDetails.map} key="map" />
+              <DataDetailsRow title="Date" value={this.state?.dataDetails.date} key="date" />
+              <DataDetailsRow title="SHA" value={this.state?.dataDetails.sha} link={this.state.shaLink} key="sha" />
             </tbody>
         </Table>
         <Tabs defaultActiveKey="stats" id="uncontrolled-tab-example" className="mb-3">
           <Tab eventKey="stats" title="Stats">
-            { this.renderStats( this.state.data.stats ) }
+            { this.renderStats( this.state.dataDetails.stats ) }
           </Tab>
           <Tab eventKey="metrics" title="Metrics">
-            { this.renderStats( this.state.data.metrics ) }
+            { this.renderStats( this.state.dataDetails.metrics ) }
           </Tab>
           <Tab eventKey="hitches" title="Hitches">
           { this.renderHitches() }
