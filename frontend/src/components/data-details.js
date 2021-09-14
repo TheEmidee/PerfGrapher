@@ -16,6 +16,8 @@ export default class DataDetails extends Component {
         projectDetails: [],
         shaLink: ''
     };
+
+    this.deleteEntry = this.deleteEntry.bind(this);
   }
 
   componentDidMount() {
@@ -82,7 +84,16 @@ export default class DataDetails extends Component {
       return <BootstrapTable keyField='id' data={ data } columns={ columns } />
     }
   }
-  
+
+  deleteEntry() {
+    axios.delete( `/api/delete-data-entry/${this.state.dataDetails._id}` )
+        .then((res) => {
+            this.props.history.push( `/project-map/${this.state.projectName}/${this.state.mapName}` );
+        }).catch((error) => {
+            console.log(error)
+        })
+  }
+
   render() {
     return (<div className="table-wrapper">
         <Breadcrumb>
@@ -91,6 +102,7 @@ export default class DataDetails extends Component {
         </Breadcrumb>
         <h1>Data details for commit {this.state.sha}</h1>
         <Button variant="outline-secondary" href={"/files/" + this.state.dataDetails.ReportName}>View Graph Report</Button>
+        <Button variant="danger" onClick={this.deleteEntry}>Delete database entry</Button>
         <Table striped bordered hover>
             <tbody>
               <DataDetailsRow title="Project" value={this.state.projectName} key="project" />

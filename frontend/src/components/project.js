@@ -45,7 +45,7 @@ export default class Project extends Component {
         }).catch((error) => {
             console.log(error)
         })
-}
+  }
 
   render() {
     return (<div className="table-wrapper">

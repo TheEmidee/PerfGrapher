@@ -149,6 +149,12 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
     return res.status(400).json({ error: "Invalid parameters" });
   }
 
+  const projectData = await projectSchema.findOne( { name: projectName } );
+
+  if ( !projectData ) {
+    return res.status(400).json( { error: `Could not find project ${projectName}` } )
+  }
+
   const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../../frontend/public/files/";
 
   const filePrefix = `${projectName}_${mapName}_${sha}`;
@@ -215,11 +221,6 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
 
     const flattenedMetricsJSON = flattenMetricsJson( metricsJSON );
     const cleanedStatsJSON = cleanStatsJSON( statsJSON );
-    const projectData = await projectSchema.findOne( { name: projectName } );
-
-    if ( !projectData ) {
-      throw new `Could not find project ${projectName}`
-    }
 
     const newData = new dataSchema({
       _id: new mongoose.Types.ObjectId(),
@@ -249,6 +250,15 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
     await unlinkFileIfExists( metricsFullPath );
     await unlinkFileIfExists( summaryFullPath );
     await unlinkFileIfExists( hitchesFullPath );
+  }
+})
+
+router.route( '/delete-data-entry/:entry_id' ).delete( async( req, res, next ) => {
+  try {
+    await dataSchema.deleteOne( { _id: req.params.entry_id } );
+    res.json( { "success" : "ok" });
+  } catch ( err ) {
+    return next( err );
   }
 })
 
