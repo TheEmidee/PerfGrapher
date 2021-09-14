@@ -9,43 +9,83 @@ export default class CreateProject extends Component {
 
     // Setting up functions
     this.onChangeProjectName = this.onChangeProjectName.bind(this);
+    this.onChangeRepositoryUri = this.onChangeRepositoryUri.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
 
     // Setting up state
     this.state = {
-      name: ''
+      name: '',
+      repositoryUri: '',
+      errors: []
     }
+  }
+
+  findFormErrors() {
+    const newErrors = {}
+    if ( !this.state.name || this.state.name === '' ) newErrors.name = 'cannot be blank!'
+    if ( !this.state.repositoryUri || this.state.repositoryUri === '' ) newErrors.repositoryUri = 'cannot be blank!'
+
+    return newErrors
   }
 
   onChangeProjectName(e) {
     this.setState({name: e.target.value})
   }
 
+  onChangeRepositoryUri(e) {
+    this.setState({repositoryUri: e.target.value})
+  }
+
   onSubmit(e) {
     e.preventDefault()
 
-    const projectObject = {
-      name: this.state.name,
-      repository: "https://github.com/FishingCactus/swarms",
-    };
+    const newErrors = this.findFormErrors()
 
-    axios.post('/api/create-project', projectObject)
-      .then( res => {
-        this.props.history.push( '/home' );
-      });
-
-    this.setState({name: ''})
+    if ( Object.keys( newErrors ).length > 0 ) {
+      this.setState( {
+        errors: newErrors
+      })
+    } else {
+      const projectObject = {
+        name: this.state.name,
+        repository: this.state.repositoryUri,
+      };
+  
+      axios.post('/api/create-project', projectObject)
+        .then( res => {
+          this.props.history.push( '/home' );
+        });
+    }
   }
 
   render() {
     return (<div className="form-wrapper">
       <Form onSubmit={this.onSubmit}>
-        <Form.Group controlId="Name">
+        <Form.Group className="mb-3" controlId="formProjectName">
           <Form.Label>Name</Form.Label>
-          <Form.Control type="text" value={this.state.name} onChange={this.onChangeProjectName}/>
+          <Form.Control 
+            type="text" 
+            value={this.state.name} 
+            onChange={this.onChangeProjectName} 
+            placeholder="Your project name" 
+            isInvalid={ !!this.state.errors.name }
+            />
+            <Form.Control.Feedback type='invalid'>{ this.state.errors.name }</Form.Control.Feedback>
         </Form.Group>
 
-        <Button variant="danger" size="lg" block="block" type="submit">
+        <Form.Group className="mb-3" controlId="formRepositoryUri">
+          <Form.Label>Repository Url</Form.Label>
+          <Form.Control 
+            type="text" 
+            value={this.state.repositoryUri} 
+            onChange={this.onChangeRepositoryUri} 
+            placeholder="https://github.com/FishingCactus/swarms/" 
+            isInvalid={ !!this.state.errors.repositoryUri }
+            />
+          <Form.Control.Feedback type='invalid'>{ this.state.errors.repositoryUri }</Form.Control.Feedback>
+        </Form.Group>
+
+        <Button variant="primary" size="lg" block="block" type="submit">
           Create Project
         </Button>
       </Form>
