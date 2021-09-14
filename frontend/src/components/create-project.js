@@ -30,7 +30,9 @@ export default class CreateProject extends Component {
     };
 
     axios.post('/api/create-project', projectObject)
-      .then(res => console.log(res.data));
+      .then( res => {
+        this.props.history.push( '/home' );
+      });
 
     this.setState({name: ''})
   }
