@@ -21,7 +21,7 @@ router.route('/').get( async ( req, res, next ) => {
 
 router.route('/get-projects').get( async ( req, res, next ) => {
   try {
-    res.json( await projectSchema.find() );
+    res.json( await projectSchema.find().sort( { "name": "ascending" } ) );
   } catch ( err ) {
     return next( err )
   }
