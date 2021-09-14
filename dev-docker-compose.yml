@@ -16,7 +16,7 @@ services:
     environment:
       - MONGO_URI=mongodb://db:27017/perfgrapher
       - PORT=4000
-      - FILES_UPLOAD_FOLDER=
+      - FILES_UPLOAD_FOLDER=/app/files
       - JWT_SECRET=secretsecret
       - JWT_EXPIRY=30d
       - DEBUG=worker:*
