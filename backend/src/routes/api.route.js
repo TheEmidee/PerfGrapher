@@ -9,7 +9,6 @@ const fsPromises = fs.promises;
   // project Model
 let projectSchema = require('../models/project');
 let dataSchema = require('../models/data');
-const project = require('../models/project');
 
 router.route('/').get( async ( req, res, next ) => {
   try {
@@ -230,7 +229,23 @@ router.route('/add-perf-data/').post( async ( req, res, next ) => {
 
 router.route( '/delete-data-entry/:entry_id' ).delete( async( req, res, next ) => {
   try {
-    await dataSchema.deleteOne( { _id: req.params.entry_id } );
+    const dataItem = await dataSchema.findOne( { _id: req.params.entry_id } )
+
+    if ( !dataItem ) {
+      return res.json( { "success" : "no data entry" } )
+    }
+
+    try {
+      const filesFolder = process.env.FILES_UPLOAD_FOLDER || __dirname + "/../../../frontend/public/files/";
+      const filePrefix = `${dataItem.project}_${dataItem.map}_${dataItem.sha}`;
+      const graphFullPath = path.join( filesFolder, `${filePrefix}.html` );
+
+      await fsPromises.unlink( graphFullPath )
+    }
+    finally {
+      await dataSchema.deleteOne( { _id: req.params.entry_id } );
+    }
+
     res.json( { "success" : "ok" });
   } catch ( err ) {
     return next( err );

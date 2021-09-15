@@ -100,15 +100,17 @@ export default class DataDetails extends Component {
     }
   }
 
-  deleteEntry() {
-    axios.delete( `/api/delete-data-entry/${this.state.dataDetails._id}` )
-        .then((res) => {
-            this.props.history.push( `/project-map/${this.state.projectName}/${this.state.mapName}` );
-        }).catch((error) => {
-            console.log(error)
-        })
-
-    this.closeConfirmationDialog();
+  async deleteEntry() {
+    try {
+      await axios.delete( `/api/delete-data-entry/${this.state.dataDetails._id}` )
+      this.props.history.push( `/project-map/${this.state.projectName}/${this.state.mapName}` );
+    }
+    catch ( err ) {
+      console.log(err)
+    }
+    finally {
+      this.closeConfirmationDialog();
+    }
   }
 
   render() {
