@@ -11,7 +11,9 @@ RUN npm install
 
 COPY . /app/frontend/
 
-RUN mkdir -p public/reports
+WORKDIR /app/frontend
+
+RUN mkdir -p /app/frontend/public/reports
 RUN ln -s /app/reports ./public/reports
 
 CMD ["npm", "start"]
