@@ -16,6 +16,7 @@ import ProjectMap from './components/project-map';
 import ProjectMapLocation from './components/project-map-location';
 import DataDetails from './components/data-details';
 import GenericNotFound from './components/generic-not-found';
+import { Button } from "react-bootstrap";
 
 const dotenv = require( "dotenv" )
 dotenv.config()
@@ -34,7 +35,7 @@ function App() {
               <Link to="/home">Home</Link>
             </Nav>
             <Nav>
-              <Link to="/create-project">Create Project</Link>
+              <Link to="/create-project"><Button variant="outline-secondary">Create Project</Button></Link>
             </Nav>
           </Container>
         </Navbar>

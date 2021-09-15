@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Breadcrumb, Table, Button, Tabs, Tab } from 'react-bootstrap';
+import { Breadcrumb, Table, Button, Tabs, Tab, Modal } from 'react-bootstrap';
 import DataDetailsRow from './data-details-row';
 import BootstrapTable from 'react-bootstrap-table-next';
 
@@ -14,10 +14,25 @@ export default class DataDetails extends Component {
         sha: this.props.match.params.sha,
         dataDetails: [],
         projectDetails: [],
-        shaLink: ''
+        shaLink: '',
+        showConfirmationDialog: false
     };
 
     this.deleteEntry = this.deleteEntry.bind(this);
+    this.closeConfirmationDialog = this.closeConfirmationDialog.bind(this)
+    this.showConfirmationDialog = this.showConfirmationDialog.bind( this )
+  }
+
+  closeConfirmationDialog() {
+    this.setState( {
+      showConfirmationDialog: false
+    })
+  }
+
+  showConfirmationDialog() {
+    this.setState( {
+        showConfirmationDialog: true
+      })
   }
 
   componentDidMount() {
@@ -92,6 +107,8 @@ export default class DataDetails extends Component {
         }).catch((error) => {
             console.log(error)
         })
+
+    this.closeConfirmationDialog();
   }
 
   render() {
@@ -102,7 +119,7 @@ export default class DataDetails extends Component {
         </Breadcrumb>
         <h1>Data details for commit {this.state.sha}</h1>
         <Button variant="outline-secondary" href={`${process.env.PUBLIC_URL}/files/${this.state.projectName}_${this.state.mapName}_${this.state.sha}.html`}>View Graph Report</Button>
-        <Button variant="danger" onClick={this.deleteEntry}>Delete database entry</Button>
+        <Button variant="danger" onClick={this.showConfirmationDialog}>Delete database entry</Button>
         <Table striped bordered hover>
             <tbody>
               <DataDetailsRow title="Project" value={this.state.projectName} key="project" />
@@ -122,6 +139,25 @@ export default class DataDetails extends Component {
           { this.renderHitches() }
           </Tab>
         </Tabs>
+        <Modal 
+          show={this.state.showConfirmationDialog} 
+          onHide={this.closeConfirmationDialog}
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+          >
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Data Item</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this data item?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.closeConfirmationDialog}>
+              No
+            </Button>
+            <Button variant="primary" onClick={this.deleteEntry}>
+              Yes
+            </Button>
+          </Modal.Footer>
+      </Modal>
     </div>);
   }
 }

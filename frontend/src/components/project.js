@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Table, Breadcrumb, Button } from 'react-bootstrap';
+import { Table, Breadcrumb, Button, Modal } from 'react-bootstrap';
 import MapTableRow from './map-table-row';
 
 export default class Project extends Component {
@@ -10,10 +10,13 @@ export default class Project extends Component {
 
     this.state = {
       projectName: this.props.match.params.name,
-      maps: []
+      maps: [],
+      showConfirmationDialog: false
     };
 
     this.deleteProject = this.deleteProject.bind(this);
+    this.closeConfirmationDialog = this.closeConfirmationDialog.bind(this)
+    this.showConfirmationDialog = this.showConfirmationDialog.bind( this )  
   }
 
   componentDidMount() {
@@ -40,11 +43,25 @@ export default class Project extends Component {
 
   deleteProject() {
     axios.delete('/api/delete-project/' + this.state.projectName)
-        .then((res) => {
-            this.props.history.push( '/' );
-        }).catch((error) => {
-            console.log(error)
-        })
+      .then((res) => {
+          this.props.history.push( '/' );
+      }).catch((error) => {
+          console.log(error)
+      })
+
+    this.closeConfirmationDialog();
+  }
+
+  closeConfirmationDialog() {
+    this.setState( {
+      showConfirmationDialog: false
+    })
+  }
+
+  showConfirmationDialog() {
+    this.setState( {
+        showConfirmationDialog: true
+      })
   }
 
   render() {
@@ -62,7 +79,26 @@ export default class Project extends Component {
           {this.DataTable()}
         </tbody>
       </Table>
-      <Button onClick={this.deleteProject} size="sm" variant="danger">Delete Project</Button>
+      <Button size="sm" variant="danger" onClick={this.showConfirmationDialog}>Delete Project</Button>
+      <Modal 
+        show={this.state.showConfirmationDialog} 
+        onHide={this.closeConfirmationDialog}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        >
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete this project and all its data?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={this.closeConfirmationDialog}>
+            No
+          </Button>
+          <Button variant="primary" onClick={this.deleteProject}>
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>);
   }
 }

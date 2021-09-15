@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Breadcrumb, Row, Col, Container, Button, Form } from "react-bootstrap";
+import { Breadcrumb, Row, Col, Container, Button, Form, Modal } from "react-bootstrap";
 import { Line } from 'react-chartjs-2';
 import ItemSelector from './item-selector';
 
@@ -17,13 +17,28 @@ export default class ProjectMap extends Component {
       selectedCategoryStatNames: [],
       selectedStat: "",
       data: [],
-      chartData: []
+      chartData: [],
+      showConfirmationDialog: false
     };
 
     this.deleteMap = this.deleteMap.bind(this);
     this.onSelectedCategoryChanged = this.onSelectedCategoryChanged.bind( this );
     this.onSelectedStatChanged = this.onSelectedStatChanged.bind( this );
     this.onChartItemClicked = this.onChartItemClicked.bind( this );
+    this.closeConfirmationDialog = this.closeConfirmationDialog.bind(this)
+    this.showConfirmationDialog = this.showConfirmationDialog.bind( this )
+  }
+
+  closeConfirmationDialog() {
+    this.setState( {
+      showConfirmationDialog: false
+    })
+  }
+
+  showConfirmationDialog() {
+    this.setState( {
+        showConfirmationDialog: true
+      })
   }
 
   createChartData( selected_category, selected_stat = '' ) {
@@ -76,6 +91,8 @@ export default class ProjectMap extends Component {
         }).catch((error) => {
             console.log(error)
         })
+
+    this.closeConfirmationDialog();
   }
 
   selectStat( stat_name ) {
@@ -193,9 +210,28 @@ export default class ProjectMap extends Component {
         </Row>
         <Row>
             <Col>
-            <Button onClick={this.deleteMap} size="sm" variant="danger">Delete Map</Button>
+              <Button onClick={this.showConfirmationDialog} size="sm" variant="danger">Delete Map</Button>
             </Col>
         </Row>
+        <Modal 
+          show={this.state.showConfirmationDialog} 
+          onHide={this.closeConfirmationDialog}
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+          >
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Map</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this map and all its data?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.closeConfirmationDialog}>
+              No
+            </Button>
+            <Button variant="primary" onClick={this.deleteMap}>
+              Yes
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Container>);
     }
 }
