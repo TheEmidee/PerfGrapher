@@ -118,7 +118,7 @@ export default class DataDetails extends Component {
             <Breadcrumb.Item href={"/project-map/" + this.state.projectName + "/" + this.state.mapName}>{this.state.mapName}</Breadcrumb.Item>
         </Breadcrumb>
         <h1>Data details for commit {this.state.sha}</h1>
-        <Button variant="outline-secondary" href={`${process.env.PUBLIC_URL}/files/${this.state.projectName}_${this.state.mapName}_${this.state.sha}.html`}>View Graph Report</Button>
+        <Button variant="outline-secondary" href={`/reports/${this.state.projectName}_${this.state.mapName}_${this.state.sha}.html`}>View Graph Report</Button>
         <Button variant="danger" onClick={this.showConfirmationDialog}>Delete database entry</Button>
         <Table striped bordered hover>
             <tbody>

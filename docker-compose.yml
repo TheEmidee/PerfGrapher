@@ -22,7 +22,7 @@ services:
     # Volumes to mount
     volumes:
       - ./backend/src:/app/backend/src
-      - ./frontend/public/files:/app/files
+      - ./reports:${BACKEND_FILES_UPLOAD_FOLDER}
     # Run command
     # Nodemon for hot reloading (-L flag required for polling in Docker)
     command: node src/server.js
@@ -42,6 +42,8 @@ services:
       - 80:80
     links:
       - server
+    volumes:
+      - ./reports:${BACKEND_FILES_UPLOAD_FOLDER}
     restart: always
   ##########################
   ### SETUP DB CONTAINER
