@@ -16,7 +16,7 @@ services:
     environment:
       - MONGO_URI=mongodb://db:27017/perfgrapher
       - PORT=4000
-      - FILES_UPLOAD_FOLDER=/app/files
+      - FILES_UPLOAD_FOLDER=/app/reports
       - JWT_SECRET=secretsecret
       - JWT_EXPIRY=30d
       - DEBUG=worker:*
@@ -28,7 +28,7 @@ services:
     # Volumes to mount
     volumes:
       - ./backend/src:/app/backend/src
-      - ./frontend/public/files:/app/files
+      - ./reports:/app/reports
     # Run command
     # Nodemon for hot reloading (-L flag required for polling in Docker)
     command: nodemon -L src/server.js
@@ -54,6 +54,7 @@ services:
     volumes:
       - ./frontend/src:/app/frontend/src
       - ./frontend/public:/app/frontend/public
+      - ./reports:/app/reports
     links:
       - server
     command: npm run start
